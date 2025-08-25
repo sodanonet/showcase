@@ -29,8 +29,8 @@ A lightweight and scalable RESTful API built with [Express.js](https://expressjs
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/express-api-starter.git
-cd express-api-starter
+git clone https://github.com/sodanonet/showcase.git
+cd showcase/express
 npm install
 ```
 
