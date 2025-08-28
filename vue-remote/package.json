@@ -1,0 +1,37 @@
+{
+  "name": "vue-remote",
+  "version": "1.0.0",
+  "description": "Vue 3 micro-frontend with Module Federation",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "webpack serve --mode development",
+    "build": "webpack --mode production",
+    "serve": "webpack serve --mode development",
+    "build:analyze": "webpack --mode production --analyze",
+    "preview": "npm run build && npx serve dist",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .js,.vue --fix",
+    "test": "echo \"Add your tests here\" && exit 0"
+  },
+  "keywords": ["vue", "micro-frontend", "module-federation"],
+  "author": "Rodrigo De Araujo",
+  "license": "MIT",
+  "dependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.1.3",
+    "vue": "^3.5.20"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "@vue/compiler-sfc": "^3.5.20",
+    "babel-loader": "^10.0.0",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.4",
+    "style-loader": "^4.0.0",
+    "vue-loader": "^17.4.2",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  }
+}
