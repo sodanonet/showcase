@@ -1,0 +1,32 @@
+{
+  "name": "js-remote",
+  "version": "1.0.0",
+  "description": "Vanilla JavaScript Micro-Frontend with Modern ES2022 Features",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "webpack serve --mode development --config webpack.config.cjs",
+    "build": "webpack --mode production --config webpack.config.cjs",
+    "lint": "eslint src/**/*.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["javascript", "micro-frontend", "module-federation", "es2022", "vanilla-js"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-private-methods": "^7.18.6",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/preset-env": "^7.25.4",
+    "babel-loader": "^9.2.1",
+    "core-js": "^3.38.1",
+    "css-loader": "^7.1.2",
+    "eslint": "^8.57.0",
+    "html-webpack-plugin": "^5.6.4",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.2"
+  }
+}
