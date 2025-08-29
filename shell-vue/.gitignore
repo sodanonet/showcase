@@ -4,19 +4,18 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Production builds
-/dist
-/build
-*.tgz
+# Production build
+dist/
+build/
 
-# Environment variables
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# IDE and editor files
+# IDE files
 .vscode/
 .idea/
 *.swp
@@ -33,35 +32,50 @@ ehthumbs.db
 Thumbs.db
 
 # Logs
-logs
+logs/
 *.log
 
 # Runtime data
-pids
+pids/
 *.pid
 *.seed
+*.pid.lock
 
 # Coverage directory used by tools like istanbul
 coverage/
 
-# Vue.js specific
-.cache/
+# Dependency directories
+jspm_packages/
 
-# Webpack bundle analysis
-bundle-analyzer-report.html
+# Optional npm cache directory
+.npm
 
-# Module Federation remoteEntry files (keep for development)
-# remoteEntry.js
+# Optional REPL history
+.node_repl_history
 
-# Temporary files
-.tmp/
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Hot module replacement
+.webpack/
+
+# Webpack bundle analyzer
+.analyzer/
+
+# Temporary folders
+tmp/
 temp/
 
-# Lock files (keep package-lock.json, remove others)
-yarn.lock
-
-# Hot reload
-.webpack-dev-server/
-
-# Vue build artifacts
+# Vue specific
 *.local
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
