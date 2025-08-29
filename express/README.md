@@ -1,15 +1,42 @@
-# 🚀 Express API Starter
+# Enhanced Express.js API Server
 
-A lightweight and scalable RESTful API built with [Express.js](https://expressjs.com/) and TypeScript. Designed for rapid development, clean architecture, and easy deployment.
+A comprehensive, production-ready Express.js backend API with TypeScript, MongoDB, JWT authentication, advanced security, analytics, and comprehensive documentation.
 
-## 📦 Features
+## 🚀 Features
 
-- ⚡ Fast and minimalist Express server
-- 🛡️ Environment-based configuration with `.env`
-- 🧪 Built-in support for testing (Jest or Mocha)
-- 📚 API documentation with Swagger (optional)
-- 🔥 Hot-reloading with Nodemon
-- ✅ Linting and formatting with ESLint + Prettier
+### 🔐 Authentication & Authorization
+- **JWT Authentication** - Secure token-based authentication
+- **Role-based Access Control** - User, Admin, and Moderator roles
+- **Password Security** - bcrypt hashing with configurable rounds
+- **Rate Limiting** - Comprehensive rate limiting for different endpoints
+
+### 📊 Analytics & Reporting
+- **Task Analytics** - Detailed task completion metrics and trends
+- **User Analytics** - User activity and productivity insights
+- **Data Export** - CSV/JSON export functionality
+- **Real-time Dashboard** - Overview statistics and KPIs
+
+### 🛡️ Security Features
+- **Security Headers** - Comprehensive HTTP security headers
+- **Request Validation** - Input sanitization and validation
+- **XSS Protection** - Cross-site scripting prevention
+- **SQL Injection Protection** - Pattern-based SQL injection detection
+- **Rate Limiting** - Multiple rate limiting strategies
+- **IP Filtering** - Whitelist/blacklist functionality
+- **Request Size Limits** - Protection against oversized payloads
+
+### 📝 API Documentation
+- **Swagger/OpenAPI** - Interactive API documentation
+- **Type Safety** - Full TypeScript integration
+- **Request/Response Examples** - Comprehensive API examples
+- **Auto-generated Docs** - Documentation from code annotations
+
+### 🗄️ Database Features
+- **MongoDB Integration** - Mongoose ODM with validation
+- **Data Relationships** - User-Task relationships with population
+- **Indexes** - Optimized database queries
+- **Validation** - Schema-level data validation
+- **Aggregation** - Complex data aggregation pipelines
 
 ## 🛠️ Tech Stack
 
