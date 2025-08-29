@@ -1,0 +1,183 @@
+<div class="angular-remote-app">
+  <!-- Header Section -->
+  <header class="app-header">
+    <h1>{{ title }}</h1>
+    <p>Built with Angular 17, TypeScript, and Module Federation</p>
+    <div class="current-time">
+      <i class="time-icon">🕒</i>
+      {{ currentTime | date:'medium' }}
+    </div>
+  </header>
+
+  <!-- Counter Section -->
+  <section class="counter-section">
+    <h2>Interactive Counter</h2>
+    <div class="counter-container">
+      <button (click)="decrement()" class="counter-btn decrement">−</button>
+      <div class="counter-display">{{ counter }}</div>
+      <button (click)="increment()" class="counter-btn increment">+</button>
+    </div>
+    <button (click)="reset()" class="reset-btn">Reset</button>
+  </section>
+
+  <!-- Task Management Section -->
+  <section class="tasks-section">
+    <h2>Task Management System</h2>
+    
+    <!-- Task Statistics -->
+    <div class="task-stats">
+      <div class="stat-card">
+        <h3>Total Tasks</h3>
+        <span class="stat-value">{{ tasks.length }}</span>
+      </div>
+      <div class="stat-card">
+        <h3>Completed</h3>
+        <span class="stat-value">{{ (tasks | json | slice:0:100).split('"completed":true').length - 1 }}</span>
+      </div>
+      <div class="stat-card">
+        <h3>Progress</h3>
+        <span class="stat-value">{{ getCompletionPercentage() }}%</span>
+      </div>
+    </div>
+
+    <!-- Task Form -->
+    <div class="task-form">
+      <form [formGroup]="newTaskForm" (ngSubmit)="addTask()">
+        <div class="form-row">
+          <input 
+            type="text" 
+            formControlName="name"
+            placeholder="Enter new task..."
+            class="task-input"
+          />
+          <select formControlName="priority" class="priority-select">
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+          </select>
+          <button 
+            type="submit" 
+            [disabled]="!newTaskForm.valid"
+            class="add-task-btn"
+          >
+            Add Task
+          </button>
+        </div>
+        <div class="form-errors" *ngIf="newTaskForm.get('name')?.errors && newTaskForm.get('name')?.touched">
+          <small *ngIf="newTaskForm.get('name')?.errors?.['required']">Task name is required</small>
+          <small *ngIf="newTaskForm.get('name')?.errors?.['minlength']">Task name must be at least 3 characters</small>
+        </div>
+      </form>
+    </div>
+
+    <!-- Task Filters -->
+    <div class="task-filters">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm"
+        placeholder="Search tasks..."
+        class="search-input"
+      />
+      <select [(ngModel)]="selectedPriority" class="filter-select">
+        <option value="all">All Priorities</option>
+        <option value="high">High Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="low">Low Priority</option>
+      </select>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list">
+      <div 
+        *ngFor="let task of filteredTasks; trackBy: trackByTaskId" 
+        class="task-item"
+        [class.completed]="task.completed"
+      >
+        <input 
+          type="checkbox"
+          [checked]="task.completed"
+          (change)="toggleTask(task.id)"
+          class="task-checkbox"
+        />
+        <span class="task-name">{{ task.name }}</span>
+        <span 
+          class="priority-badge"
+          [style.background-color]="getPriorityColor(task.priority)"
+        >
+          {{ task.priority }}
+        </span>
+        <button (click)="deleteTask(task.id)" class="delete-btn">×</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analytics Dashboard -->
+  <section class="analytics-section">
+    <h2>Analytics Dashboard</h2>
+    
+    <div class="analytics-summary">
+      <div class="summary-card">
+        <h3>Total Users</h3>
+        <span class="summary-value">{{ getTotalUsers() | number }}</span>
+      </div>
+      <div class="summary-card">
+        <h3>Total Revenue</h3>
+        <span class="summary-value">${{ getTotalRevenue() | number }}</span>
+      </div>
+      <div class="summary-card">
+        <h3>Avg Conversion</h3>
+        <span class="summary-value">{{ getAverageConversion() }}%</span>
+      </div>
+    </div>
+
+    <div class="analytics-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Users</th>
+            <th>Revenue</th>
+            <th>Conversion %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of analyticsData">
+            <td>{{ data.month }}</td>
+            <td>{{ data.users | number }}</td>
+            <td>${{ data.revenue | number }}</td>
+            <td>{{ data.conversion }}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Data Table Demo -->
+  <app-data-table></app-data-table>
+
+  <!-- Angular Features Demo -->
+  <app-angular-features></app-angular-features>
+
+  <!-- Technology Stack Info -->
+  <section class="tech-stack">
+    <h2>Technology Stack</h2>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <h4>Angular 17</h4>
+        <p>Latest Angular with standalone components and signals</p>
+      </div>
+      <div class="tech-item">
+        <h4>TypeScript 5.3</h4>
+        <p>Type-safe development with modern JS features</p>
+      </div>
+      <div class="tech-item">
+        <h4>RxJS</h4>
+        <p>Reactive programming with observables</p>
+      </div>
+      <div class="tech-item">
+        <h4>Module Federation</h4>
+        <p>Micro-frontend architecture and deployment</p>
+      </div>
+    </div>
+  </section>
+</div>

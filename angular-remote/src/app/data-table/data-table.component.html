@@ -1,0 +1,114 @@
+<div class="data-table-container">
+  <h3>Employee Data Table</h3>
+  
+  <!-- Filters and Search -->
+  <div class="table-controls">
+    <div class="search-section">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+        placeholder="Search employees..."
+        class="search-input"
+      />
+    </div>
+    
+    <div class="filter-section">
+      <select [(ngModel)]="selectedDepartment" (change)="applyFilters()" class="filter-select">
+        <option value="all">All Departments</option>
+        <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+      </select>
+      
+      <select [(ngModel)]="selectedStatus" (change)="applyFilters()" class="filter-select">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+  </div>
+  
+  <!-- Table Statistics -->
+  <div class="table-stats">
+    <div class="stat-item">
+      <span class="stat-label">Total Employees:</span>
+      <span class="stat-value">{{ filteredEmployees.length }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Total Salary:</span>
+      <span class="stat-value">{{ getTotalSalary() | currency:'USD':'symbol':'1.0-0' }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Average Salary:</span>
+      <span class="stat-value">{{ getAverageSalary() | currency:'USD':'symbol':'1.0-0' }}</span>
+    </div>
+  </div>
+  
+  <!-- Data Table -->
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th (click)="sort('id')" class="sortable">
+            ID {{ getSortIcon('id') }}
+          </th>
+          <th (click)="sort('name')" class="sortable">
+            Name {{ getSortIcon('name') }}
+          </th>
+          <th (click)="sort('position')" class="sortable">
+            Position {{ getSortIcon('position') }}
+          </th>
+          <th (click)="sort('department')" class="sortable">
+            Department {{ getSortIcon('department') }}
+          </th>
+          <th (click)="sort('salary')" class="sortable">
+            Salary {{ getSortIcon('salary') }}
+          </th>
+          <th (click)="sort('startDate')" class="sortable">
+            Start Date {{ getSortIcon('startDate') }}
+          </th>
+          <th>Email</th>
+          <th (click)="sort('status')" class="sortable">
+            Status {{ getSortIcon('status') }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let employee of filteredEmployees; trackBy: trackByEmployeeId"
+          [class.inactive-row]="employee.status === 'inactive'"
+        >
+          <td>{{ employee.id }}</td>
+          <td class="name-cell">{{ employee.name }}</td>
+          <td>{{ employee.position }}</td>
+          <td>
+            <span 
+              class="department-badge"
+              [class.engineering]="employee.department === 'Engineering'"
+              [class.product]="employee.department === 'Product'"
+              [class.design]="employee.department === 'Design'"
+              [class.analytics]="employee.department === 'Analytics'"
+            >
+              {{ employee.department }}
+            </span>
+          </td>
+          <td class="salary-cell">{{ employee.salary | currency:'USD':'symbol':'1.0-0' }}</td>
+          <td>{{ employee.startDate | date:'mediumDate' }}</td>
+          <td class="email-cell">{{ employee.email }}</td>
+          <td>
+            <span 
+              class="status-badge"
+              [class.active]="employee.status === 'active'"
+              [class.inactive]="employee.status === 'inactive'"
+            >
+              {{ employee.status | titlecase }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="filteredEmployees.length === 0" class="no-results">
+      <p>No employees found matching your criteria.</p>
+    </div>
+  </div>
+</div>

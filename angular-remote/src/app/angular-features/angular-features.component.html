@@ -1,0 +1,144 @@
+<section class="angular-features">
+  <h2>Angular Framework Features</h2>
+  
+  <!-- Data Binding Demo -->
+  <div class="feature-demo">
+    <h3>Data Binding & Directives</h3>
+    
+    <div class="binding-examples">
+      <div class="binding-item">
+        <h4>Two-way Data Binding</h4>
+        <input 
+          [(ngModel)]="inputValue" 
+          placeholder="Type something..."
+          class="demo-input"
+        />
+        <p>Current value: <strong>{{ inputValue }}</strong></p>
+      </div>
+      
+      <div class="binding-item">
+        <h4>Event Binding & Property Binding</h4>
+        <button 
+          (click)="handleClick()"
+          [class.active]="clickCount > 0"
+          class="demo-button"
+        >
+          Click me! ({{ clickCount }} times)
+        </button>
+        <button (click)="resetClick()" class="reset-button">Reset</button>
+      </div>
+      
+      <div class="binding-item">
+        <h4>Structural Directives (*ngFor, *ngIf)</h4>
+        <ul class="items-list">
+          <li 
+            *ngFor="let item of items; let i = index"
+            (click)="onItemSelect(item)"
+            [class.selected]="selectedItem === item"
+            class="item"
+          >
+            {{ i + 1 }}. {{ item }}
+          </li>
+        </ul>
+        <p *ngIf="selectedItem" class="selection-info">
+          Selected: <strong>{{ selectedItem }}</strong>
+        </p>
+        <p *ngIf="!selectedItem" class="selection-info">
+          Click an item to select it
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- RxJS Observables Demo -->
+  <div class="feature-demo">
+    <h3>RxJS Observables</h3>
+    <div class="rxjs-demo">
+      <h4>Live Timestamp Stream</h4>
+      <div class="timestamp-display">
+        Current timestamp: 
+        <strong>{{ currentTimestamp$ | async | date:'medium' }}</strong>
+      </div>
+      <p class="demo-description">
+        This demonstrates an RxJS Observable that emits a new timestamp every second,
+        properly managed with takeUntil to prevent memory leaks.
+      </p>
+    </div>
+  </div>
+  
+  <!-- Lifecycle Hooks Demo -->
+  <div class="feature-demo">
+    <h3>Component Lifecycle Hooks</h3>
+    <div class="lifecycle-demo">
+      <h4>Lifecycle Events Log</h4>
+      <ul class="lifecycle-events">
+        <li *ngFor="let event of lifecycleEvents" class="lifecycle-event">
+          {{ event }}
+        </li>
+      </ul>
+      <p class="demo-description">
+        This shows Angular's component lifecycle hooks in action. 
+        Check the console for additional lifecycle events.
+      </p>
+    </div>
+  </div>
+  
+  <!-- Pipes Demo -->
+  <div class="feature-demo">
+    <h3>Angular Pipes</h3>
+    <div class="pipes-demo">
+      <div class="pipe-examples">
+        <div class="pipe-item">
+          <strong>Date Pipe:</strong> {{ currentTimestamp$ | async | date:'fullDate' }}
+        </div>
+        <div class="pipe-item">
+          <strong>Currency Pipe:</strong> {{ 12345.67 | currency:'USD':'symbol':'1.2-2' }}
+        </div>
+        <div class="pipe-item">
+          <strong>Percent Pipe:</strong> {{ 0.875 | percent:'1.1-1' }}
+        </div>
+        <div class="pipe-item">
+          <strong>Uppercase Pipe:</strong> {{ 'angular is awesome' | uppercase }}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TypeScript Features -->
+  <div class="feature-demo">
+    <h3>TypeScript Integration</h3>
+    <div class="typescript-demo">
+      <h4>Type Safety & Modern JavaScript</h4>
+      <ul class="feature-list">
+        <li>Strong typing with interfaces and classes</li>
+        <li>Decorators for components and services</li>
+        <li>Generic types for reusable code</li>
+        <li>ES2022+ features with transpilation</li>
+        <li>IntelliSense and compile-time error checking</li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Framework Benefits -->
+  <div class="feature-demo">
+    <h3>Angular Framework Benefits</h3>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <h4>🏗️ Architecture</h4>
+        <p>Component-based architecture with dependency injection</p>
+      </div>
+      <div class="benefit-card">
+        <h4>⚡ Performance</h4>
+        <p>Change detection, lazy loading, and AOT compilation</p>
+      </div>
+      <div class="benefit-card">
+        <h4>🔧 Tooling</h4>
+        <p>Angular CLI, testing utilities, and dev tools</p>
+      </div>
+      <div class="benefit-card">
+        <h4>🌐 Ecosystem</h4>
+        <p>Rich ecosystem with Angular Material, NgRx, and more</p>
+      </div>
+    </div>
+  </div>
+</section>
