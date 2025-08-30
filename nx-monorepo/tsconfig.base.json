@@ -15,9 +15,12 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@nx-monorepo/shared-components": ["packages/shared-components/src/index.ts"],
+      "@nx-monorepo/shared-components": [
+        "packages/shared-components/src/index.ts"
+      ],
+      "@nx-monorepo/shared-types": ["packages/shared-types/src/index.ts"],
       "@nx-monorepo/shared-utils": ["packages/shared-utils/src/index.ts"],
-      "@nx-monorepo/shared-types": ["packages/shared-types/src/index.ts"]
+      "@nx-monorepo/ui-components": ["ui-components/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
