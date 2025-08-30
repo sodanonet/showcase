@@ -1,47 +1,58 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { ReduxService } from '../services/redux.service';
+import { RootState } from '../store';
+import { increment, decrement, incrementByAmount, reset, multiplyBy } from '../store/slices/counter.slice';
+import { setThemeMode, applyAngularPreset, toggleAnimations } from '../store/slices/theme.slice';
+import { simulateLogin, clearUser, updatePreferences, incrementActions } from '../store/slices/user.slice';
+import { addDataItem, updateDataItem, removeDataItem, setFilter } from '../store/slices/data.slice';
 
 @Component({
   selector: 'app-remote-component',
   templateUrl: './remote-component.component.html',
   styleUrls: ['./remote-component.component.css']
 })
-export class RemoteComponent implements OnInit {
+export class RemoteComponent implements OnInit, OnDestroy {
   title = 'Angular Remote Micro-Frontend';
   
-  // Counter functionality
-  counter = 0;
+  // Redux observables
+  counter$: Observable<RootState['counter']>;
+  user$: Observable<RootState['user']>;
+  theme$: Observable<RootState['theme']>;
+  data$: Observable<RootState['data']>;
   
-  // Task management
-  tasks = [
-    { id: 1, name: 'Learn Angular 17', completed: true, priority: 'high' },
-    { id: 2, name: 'Master TypeScript', completed: true, priority: 'high' },
-    { id: 3, name: 'Build Micro-frontend', completed: false, priority: 'medium' },
-    { id: 4, name: 'Implement RxJS', completed: false, priority: 'low' }
-  ];
-  
+  // Local state
+  customAmount = 5;
   newTaskForm: FormGroup;
+  newDataForm: FormGroup;
   
-  // Analytics data
-  analyticsData = [
-    { month: 'Jan', users: 1200, revenue: 25000, conversion: 3.2 },
-    { month: 'Feb', users: 1450, revenue: 28500, conversion: 3.6 },
-    { month: 'Mar', users: 1680, revenue: 32000, conversion: 4.1 },
-    { month: 'Apr', users: 1920, revenue: 38500, conversion: 4.5 },
-    { month: 'May', users: 2150, revenue: 42000, conversion: 4.8 },
-    { month: 'Jun', users: 2380, revenue: 48500, conversion: 5.2 }
-  ];
+  private destroy$ = new Subject<void>();
   
   // Dynamic content
   selectedPriority = 'all';
   searchTerm = '';
   currentTime = new Date();
   
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private reduxService: ReduxService) {
     this.newTaskForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      priority: ['medium', Validators.required]
+      priority: ['medium', Validators.required],
+      category: ['Development', Validators.required]
     });
+
+    this.newDataForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      value: [0, [Validators.required, Validators.min(0)]],
+      category: ['Development', Validators.required]
+    });
+
+    // Initialize Redux observables
+    this.counter$ = this.reduxService.selectCounter();
+    this.user$ = this.reduxService.selectUser();
+    this.theme$ = this.reduxService.selectTheme();
+    this.data$ = this.reduxService.selectData();
   }
   
   ngOnInit() {
@@ -50,74 +61,98 @@ export class RemoteComponent implements OnInit {
       this.currentTime = new Date();
     }, 1000);
   }
-  
-  // Counter methods
-  increment() {
-    this.counter++;
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
   
-  decrement() {
-    this.counter--;
+  // Redux Counter methods
+  incrementCounter() {
+    this.reduxService.dispatch(increment());
+    this.reduxService.dispatch(incrementActions());
   }
   
-  reset() {
-    this.counter = 0;
+  decrementCounter() {
+    this.reduxService.dispatch(decrement());
+    this.reduxService.dispatch(incrementActions());
   }
   
-  // Task management methods
-  addTask() {
-    if (this.newTaskForm.valid) {
-      const newTask = {
-        id: Math.max(...this.tasks.map(t => t.id)) + 1,
-        name: this.newTaskForm.value.name,
-        completed: false,
-        priority: this.newTaskForm.value.priority
-      };
-      this.tasks.push(newTask);
-      this.newTaskForm.reset({ priority: 'medium' });
+  resetCounter() {
+    this.reduxService.dispatch(reset());
+    this.reduxService.dispatch(incrementActions());
+  }
+
+  addCustomAmount() {
+    this.reduxService.dispatch(incrementByAmount(this.customAmount));
+    this.reduxService.dispatch(incrementActions());
+  }
+
+  multiplyCounter(factor: number) {
+    this.reduxService.dispatch(multiplyBy(factor));
+    this.reduxService.dispatch(incrementActions());
+  }
+
+  // Redux Data management methods
+  addDataItem() {
+    if (this.newDataForm.valid) {
+      this.reduxService.dispatch(addDataItem({
+        name: this.newDataForm.value.name,
+        value: this.newDataForm.value.value,
+        category: this.newDataForm.value.category
+      }));
+      this.newDataForm.reset({ category: 'Development', value: 0 });
     }
   }
-  
-  toggleTask(taskId: number) {
-    const task = this.tasks.find(t => t.id === taskId);
-    if (task) {
-      task.completed = !task.completed;
-    }
+
+  updateDataItem(id: string, updates: any) {
+    this.reduxService.dispatch(updateDataItem({ id, updates }));
   }
-  
-  deleteTask(taskId: number) {
-    this.tasks = this.tasks.filter(t => t.id !== taskId);
+
+  removeDataItem(id: string) {
+    this.reduxService.dispatch(removeDataItem(id));
   }
-  
-  // Filtering methods
-  get filteredTasks() {
-    let filtered = this.tasks;
+
+  setDataFilter(filter: any) {
+    this.reduxService.dispatch(setFilter(filter));
+  }
+
+  // User management methods
+  loginUser() {
+    this.reduxService.dispatch(simulateLogin({
+      username: 'Angular Admin',
+      email: 'admin@angular-remote.com',
+      department: 'Frontend Engineering'
+    }));
+  }
+
+  logoutUser() {
+    this.reduxService.dispatch(clearUser());
     
-    if (this.selectedPriority !== 'all') {
-      filtered = filtered.filter(task => task.priority === this.selectedPriority);
+    // Notify other micro-frontends
+    if (typeof window !== 'undefined' && (window as any).__GLOBAL_STATE_MANAGER__) {
+      (window as any).__GLOBAL_STATE_MANAGER__.dispatch({
+        type: 'user/globalLogout',
+        source: 'angular-remote'
+      });
     }
-    
-    if (this.searchTerm) {
-      filtered = filtered.filter(task => 
-        task.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    }
-    
-    return filtered;
   }
-  
-  // Analytics methods
-  getTotalUsers() {
-    return this.analyticsData.reduce((total, month) => total + month.users, 0);
+
+  updateUserPreferences(preferences: any) {
+    this.reduxService.dispatch(updatePreferences(preferences));
   }
-  
-  getTotalRevenue() {
-    return this.analyticsData.reduce((total, month) => total + month.revenue, 0);
+
+  // Theme management methods
+  setTheme(mode: 'light' | 'dark' | 'auto') {
+    this.reduxService.dispatch(setThemeMode(mode));
   }
-  
-  getAverageConversion() {
-    const total = this.analyticsData.reduce((sum, month) => sum + month.conversion, 0);
-    return (total / this.analyticsData.length).toFixed(1);
+
+  applyThemePreset(preset: 'material' | 'bootstrap' | 'custom' | 'dark-material') {
+    this.reduxService.dispatch(applyAngularPreset(preset));
+  }
+
+  toggleThemeAnimations() {
+    this.reduxService.dispatch(toggleAnimations());
   }
   
   // Utility methods
@@ -129,13 +164,41 @@ export class RemoteComponent implements OnInit {
       default: return '#7f8c8d';
     }
   }
-  
-  getCompletionPercentage(): number {
-    const completed = this.tasks.filter(t => t.completed).length;
-    return Math.round((completed / this.tasks.length) * 100) || 0;
+
+  getCategoryColor(category: string): string {
+    switch (category) {
+      case 'Development': return '#3498db';
+      case 'Architecture': return '#9b59b6';
+      case 'Testing': return '#e67e22';
+      default: return '#7f8c8d';
+    }
   }
 
-  trackByTaskId(index: number, task: any): number {
-    return task.id;
+  trackById(index: number, item: any): string {
+    return item.id;
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  }
+
+  formatNumber(num: number): string {
+    return new Intl.NumberFormat('en-US').format(num);
+  }
+
+  getThemeStyles(theme: any) {
+    return {
+      '--primary-color': theme.primaryColor,
+      '--secondary-color': theme.secondaryColor,
+      '--accent-color': theme.accentColor,
+      'font-size': theme.fontSize === 'small' ? '14px' : 
+                   theme.fontSize === 'large' ? '18px' : '16px',
+      '--border-radius': theme.borderRadius === 'none' ? '0' :
+                        theme.borderRadius === 'small' ? '4px' :
+                        theme.borderRadius === 'large' ? '12px' : '8px'
+    };
   }
 }

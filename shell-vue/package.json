@@ -10,11 +10,20 @@
     "serve": "npm run build && npx http-server dist -p 3000 -o",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["vue", "shell", "micro-frontend", "module-federation", "host"],
+  "keywords": [
+    "vue",
+    "shell",
+    "micro-frontend",
+    "module-federation",
+    "host"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "vue": "^3.4.38"
+    "@reduxjs/toolkit": "^2.8.2",
+    "redux": "^5.0.1",
+    "vue": "^3.4.38",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

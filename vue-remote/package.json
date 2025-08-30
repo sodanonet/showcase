@@ -13,13 +13,20 @@
     "lint": "eslint src --ext .js,.vue --fix",
     "test": "echo \"Add your tests here\" && exit 0"
   },
-  "keywords": ["vue", "micro-frontend", "module-federation"],
+  "keywords": [
+    "vue",
+    "micro-frontend",
+    "module-federation"
+  ],
   "author": "Rodrigo De Araujo",
   "license": "MIT",
   "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
     "@vitejs/plugin-vue": "^6.0.1",
+    "redux": "^5.0.1",
     "vite": "^7.1.3",
-    "vue": "^3.5.20"
+    "vue": "^3.5.20",
+    "vue-redux": "^0.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",
