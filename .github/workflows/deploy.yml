@@ -1,0 +1,144 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*' ]
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/showcase
+
+jobs:
+  # Build and push Docker images
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service: [express, shell-vue, react-remote, vue-remote, angular-remote, ts-remote, js-remote]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix={{branch}}-
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Deploy to staging environment
+  deploy-staging:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add your staging deployment commands here
+          # Example: kubectl apply -f k8s/staging/ or docker stack deploy
+          echo "Staging deployment completed!"
+
+  # Deploy to production environment
+  deploy-production:
+    needs: [build-and-push, deploy-staging]
+    runs-on: ubuntu-latest
+    environment: production
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment..."
+          # Add your production deployment commands here
+          # Example: kubectl apply -f k8s/production/ or docker stack deploy
+          echo "Production deployment completed!"
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## Changes in this Release
+            - Full stack micro-frontend showcase application
+            - Express.js API with MongoDB
+            - React, Vue, Angular, TypeScript, and JavaScript remotes
+            - Vue Shell host application
+            - Docker containerization
+            - Nginx load balancing
+            
+            ## Docker Images
+            All services are available as Docker images:
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-express:${{ github.ref_name }}`
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-shell-vue:${{ github.ref_name }}`
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-react-remote:${{ github.ref_name }}`
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-vue-remote:${{ github.ref_name }}`
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-angular-remote:${{ github.ref_name }}`
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-ts-remote:${{ github.ref_name }}`
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-js-remote:${{ github.ref_name }}`
+          draft: false
+          prerelease: false
+
+  # Security scanning
+  security-scan:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

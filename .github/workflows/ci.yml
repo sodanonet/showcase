@@ -1,0 +1,362 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Detect changed projects
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      shell-vue: ${{ steps.changes.outputs.shell-vue }}
+      react-remote: ${{ steps.changes.outputs.react-remote }}
+      vue-remote: ${{ steps.changes.outputs.vue-remote }}
+      angular-remote: ${{ steps.changes.outputs.angular-remote }}
+      ts-remote: ${{ steps.changes.outputs.ts-remote }}
+      js-remote: ${{ steps.changes.outputs.js-remote }}
+      express: ${{ steps.changes.outputs.express }}
+      nx-monorepo: ${{ steps.changes.outputs.nx-monorepo }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            shell-vue:
+              - 'shell-vue/**'
+            react-remote:
+              - 'react-remote/**'
+            vue-remote:
+              - 'vue-remote/**'
+            angular-remote:
+              - 'angular-remote/**'
+            ts-remote:
+              - 'ts-remote/**'
+            js-remote:
+              - 'js-remote/**'
+            express:
+              - 'express/**'
+            nx-monorepo:
+              - 'nx-monorepo/**'
+
+  # Build and test NX Monorepo (shared libraries)
+  nx-monorepo:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.nx-monorepo == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nx-monorepo/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: nx-monorepo
+        run: npm ci
+      
+      - name: Build libraries
+        working-directory: nx-monorepo
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: nx-monorepo
+        run: npm test -- --passWithNoTests
+
+  # Express.js API
+  express-api:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.express == 'true'
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7-jammy
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password123
+          MONGO_INITDB_DATABASE: showcase
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "echo 'db.runCommand(\"ping\").ok' | mongosh --quiet"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: express/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: express
+        run: npm ci
+      
+      - name: Build TypeScript
+        working-directory: express
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: express
+        run: npm test
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://admin:password123@localhost:27017/showcase_test?authSource=admin
+          JWT_SECRET: test-jwt-secret-key-for-testing-only
+      
+      - name: Build Docker image
+        run: docker build -t showcase-express ./express
+
+  # React Remote
+  react-remote:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.react-remote == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: react-remote/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: react-remote
+        run: npm ci
+      
+      - name: Build application
+        working-directory: react-remote
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: react-remote
+        run: npm test -- --passWithNoTests --watchAll=false
+      
+      - name: Build Docker image
+        run: docker build -t showcase-react-remote ./react-remote
+
+  # Vue Remote
+  vue-remote:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.vue-remote == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: vue-remote/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: vue-remote
+        run: npm ci
+      
+      - name: Build application
+        working-directory: vue-remote
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: vue-remote
+        run: npm test -- --passWithNoTests
+      
+      - name: Build Docker image
+        run: docker build -t showcase-vue-remote ./vue-remote
+
+  # Angular Remote
+  angular-remote:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.angular-remote == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: angular-remote/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: angular-remote
+        run: npm ci
+      
+      - name: Build application
+        working-directory: angular-remote
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: angular-remote
+        run: npm run test -- --watch=false --browsers=ChromeHeadless
+      
+      - name: Build Docker image
+        run: docker build -t showcase-angular-remote ./angular-remote
+
+  # TypeScript Remote
+  ts-remote:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ts-remote == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ts-remote/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ts-remote
+        run: npm ci
+      
+      - name: Build application
+        working-directory: ts-remote
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: ts-remote
+        run: npm test -- --passWithNoTests
+      
+      - name: Build Docker image
+        run: docker build -t showcase-ts-remote ./ts-remote
+
+  # JavaScript Remote
+  js-remote:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.js-remote == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: js-remote/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: js-remote
+        run: npm ci
+      
+      - name: Build application
+        working-directory: js-remote
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: js-remote
+        run: npm test -- --passWithNoTests
+      
+      - name: Build Docker image
+        run: docker build -t showcase-js-remote ./js-remote
+
+  # Shell Vue (Main Application)
+  shell-vue:
+    needs: [detect-changes, nx-monorepo]
+    if: needs.detect-changes.outputs.shell-vue == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: shell-vue/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: shell-vue
+        run: npm ci
+      
+      - name: Build application
+        working-directory: shell-vue
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: shell-vue
+        run: npm test -- --passWithNoTests
+      
+      - name: Build Docker image
+        run: docker build -t showcase-shell-vue ./shell-vue
+
+  # Full stack integration test
+  integration-test:
+    needs: [express-api, react-remote, vue-remote, angular-remote, ts-remote, js-remote, shell-vue]
+    if: always() && (needs.express-api.result == 'success' || needs.express-api.result == 'skipped') && (needs.react-remote.result == 'success' || needs.react-remote.result == 'skipped') && (needs.vue-remote.result == 'success' || needs.vue-remote.result == 'skipped') && (needs.angular-remote.result == 'success' || needs.angular-remote.result == 'skipped') && (needs.ts-remote.result == 'success' || needs.ts-remote.result == 'skipped') && (needs.js-remote.result == 'success' || needs.js-remote.result == 'skipped') && (needs.shell-vue.result == 'success' || needs.shell-vue.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Start full stack with Docker Compose
+        run: |
+          docker-compose up -d --build
+          sleep 60  # Wait for all services to start
+      
+      - name: Health check all services
+        run: |
+          echo "Checking MongoDB..."
+          docker-compose exec -T mongodb mongosh --eval "db.runCommand('ping')"
+          
+          echo "Checking Express API..."
+          curl -f http://localhost:5000/health || exit 1
+          
+          echo "Checking Shell Vue..."
+          curl -f http://localhost:3000/health || exit 1
+          
+          echo "Checking React Remote..."
+          curl -f http://localhost:3001/health || exit 1
+          
+          echo "Checking Vue Remote..."
+          curl -f http://localhost:3002/health || exit 1
+          
+          echo "Checking Angular Remote..."
+          curl -f http://localhost:3004/health || exit 1
+          
+          echo "Checking TypeScript Remote..."
+          curl -f http://localhost:3005/health || exit 1
+          
+          echo "Checking JavaScript Remote..."
+          curl -f http://localhost:3006/health || exit 1
+          
+          echo "Checking Nginx Load Balancer..."
+          curl -f http://localhost/health || exit 1
+      
+      - name: Test API endpoints
+        run: |
+          echo "Testing API registration..."
+          curl -X POST http://localhost/api/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!"}' || exit 1
+          
+          echo "Testing API login..."
+          curl -X POST http://localhost/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test@example.com","password":"TestPass123!"}' || exit 1
+      
+      - name: Cleanup
+        if: always()
+        run: docker-compose down -v
