@@ -1,0 +1,414 @@
+name: Comprehensive Testing Suite
+
+on:
+  push:
+    branches: [ master, develop, feature/* ]
+  pull_request:
+    branches: [ master, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '18'
+  MONGODB_URI: 'mongodb://localhost:27017/showcase-test'
+  JWT_SECRET: 'test-secret-key'
+
+jobs:
+  # Unit and Component Tests
+  unit-tests:
+    name: Unit & Component Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        test-suite: [react, vue, storybook, api]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install testing dependencies
+        run: |
+          cd testing
+          npm ci
+      
+      - name: Install project dependencies
+        run: |
+          # Install dependencies for all projects
+          cd shell-vue && npm ci && cd ..
+          cd react-remote && npm ci && cd ..
+          cd vue-remote && npm ci && cd ..
+          cd angular-remote && npm ci && cd ..
+          cd ts-remote && npm ci && cd ..
+          cd js-remote && npm ci && cd ..
+          cd express && npm ci && cd ..
+          cd nx-monorepo && npm ci && cd ..
+      
+      - name: Run ${{ matrix.test-suite }} tests
+        run: |
+          cd testing
+          case "${{ matrix.test-suite }}" in
+            "react")
+              npm run test:component -- --testPathPattern=react
+              ;;
+            "vue")
+              npm run test:component -- --testPathPattern=vue
+              ;;
+            "storybook")
+              npm run test:component -- --testPathPattern=storybook
+              ;;
+            "api")
+              npm run test:api
+              ;;
+          esac
+      
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./testing/coverage/lcov.info
+          flags: ${{ matrix.test-suite }}
+          name: ${{ matrix.test-suite }}-coverage
+
+  # End-to-End Tests
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          cd testing && npm ci
+          cd shell-vue && npm ci && cd ..
+          cd react-remote && npm ci && cd ..
+          cd vue-remote && npm ci && cd ..
+          cd angular-remote && npm ci && cd ..
+          cd ts-remote && npm ci && cd ..
+          cd js-remote && npm ci && cd ..
+          cd express && npm ci && cd ..
+          cd nx-monorepo && npm ci
+      
+      - name: Install Playwright browsers
+        run: |
+          cd testing
+          npx playwright install --with-deps
+      
+      - name: Build applications
+        run: |
+          # Build all applications for production testing
+          cd shell-vue && npm run build && cd ..
+          cd react-remote && npm run build && cd ..
+          cd vue-remote && npm run build && cd ..
+          cd angular-remote && npm run build && cd ..
+          cd ts-remote && npm run build && cd ..
+          cd js-remote && npm run build && cd ..
+          cd express && npm run build && cd ..
+          cd nx-monorepo && npm run build
+      
+      - name: Start applications in background
+        run: |
+          # Start all applications
+          cd express && npm run dev &
+          cd shell-vue && npm run dev &
+          cd react-remote && npm start &
+          cd vue-remote && npm run dev &
+          cd angular-remote && npm start &
+          cd ts-remote && npm run dev &
+          cd js-remote && npm run dev &
+          
+          # Wait for applications to start
+          sleep 30
+      
+      - name: Run E2E tests
+        run: |
+          cd testing
+          npm run test:e2e
+      
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: testing/playwright-report/
+          retention-days: 30
+      
+      - name: Upload E2E test videos
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-videos
+          path: testing/test-results/
+          retention-days: 7
+
+  # Visual Regression Tests
+  visual-tests:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          cd testing && npm ci
+          cd shell-vue && npm ci && cd ..
+          cd react-remote && npm ci && cd ..
+          cd vue-remote && npm ci && cd ..
+          cd nx-monorepo && npm ci
+      
+      - name: Install Playwright browsers
+        run: |
+          cd testing
+          npx playwright install --with-deps chromium
+      
+      - name: Start applications
+        run: |
+          cd shell-vue && npm run dev &
+          cd react-remote && npm start &
+          cd vue-remote && npm run dev &
+          cd nx-monorepo && npm run storybook:dev &
+          sleep 30
+      
+      - name: Run visual regression tests
+        run: |
+          cd testing
+          npm run test:visual
+      
+      - name: Upload visual test results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: visual-regression-diffs
+          path: testing/test-results/
+          retention-days: 7
+
+  # Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          cd testing && npm ci
+          cd shell-vue && npm ci && cd ..
+          cd express && npm ci
+      
+      - name: Install Playwright browsers
+        run: |
+          cd testing
+          npx playwright install --with-deps chromium
+      
+      - name: Start applications
+        run: |
+          cd express && npm run dev &
+          cd shell-vue && npm run dev &
+          sleep 30
+      
+      - name: Run performance tests
+        run: |
+          cd testing
+          npm run test:performance
+      
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: lighthouse-reports
+          path: testing/lighthouse-reports/
+          retention-days: 30
+
+  # Accessibility Tests
+  accessibility-tests:
+    name: Accessibility Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          cd testing && npm ci
+          cd shell-vue && npm ci && cd ..
+          cd react-remote && npm ci && cd ..
+          cd vue-remote && npm ci && cd ..
+          cd angular-remote && npm ci && cd ..
+          cd ts-remote && npm ci && cd ..
+          cd js-remote && npm ci
+      
+      - name: Install Playwright browsers
+        run: |
+          cd testing
+          npx playwright install --with-deps
+      
+      - name: Start applications
+        run: |
+          cd shell-vue && npm run dev &
+          cd react-remote && npm start &
+          cd vue-remote && npm run dev &
+          cd angular-remote && npm start &
+          cd ts-remote && npm run dev &
+          cd js-remote && npm run dev &
+          sleep 30
+      
+      - name: Run accessibility tests
+        run: |
+          cd testing
+          npx playwright test --grep @accessibility
+      
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v3
+        with:
+          name: accessibility-report
+          path: testing/a11y-report/
+          retention-days: 30
+
+  # Storybook Tests
+  storybook-tests:
+    name: Storybook Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          cd nx-monorepo && npm ci
+          cd testing && npm ci
+      
+      - name: Build Storybook
+        run: |
+          cd nx-monorepo
+          npm run storybook:build
+      
+      - name: Install Playwright browsers
+        run: |
+          cd testing
+          npx playwright install --with-deps chromium
+      
+      - name: Start Storybook
+        run: |
+          cd nx-monorepo
+          npx http-server storybook-static -p 6006 &
+          sleep 10
+      
+      - name: Run Storybook tests
+        run: |
+          cd testing
+          npx playwright test --grep "storybook"
+
+  # Security Tests
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run npm audit
+        run: |
+          # Check all projects for security vulnerabilities
+          cd shell-vue && npm audit --audit-level high && cd ..
+          cd react-remote && npm audit --audit-level high && cd ..
+          cd vue-remote && npm audit --audit-level high && cd ..
+          cd angular-remote && npm audit --audit-level high && cd ..
+          cd ts-remote && npm audit --audit-level high && cd ..
+          cd js-remote && npm audit --audit-level high && cd ..
+          cd express && npm audit --audit-level high && cd ..
+          cd nx-monorepo && npm audit --audit-level high && cd ..
+          cd testing && npm audit --audit-level high
+      
+      - name: Run security linting
+        run: |
+          # Install and run ESLint security plugin
+          npm install -g eslint eslint-plugin-security
+          find . -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | 
+          grep -v node_modules | 
+          xargs eslint --config '{"plugins": ["security"], "rules": {"security/detect-object-injection": "error"}}'
+
+  # Test Summary
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, e2e-tests, visual-tests, performance-tests, accessibility-tests, storybook-tests, security-tests]
+    if: always()
+    
+    steps:
+      - name: Test Results Summary
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Visual Tests | ${{ needs.visual-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance Tests | ${{ needs.performance-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Accessibility Tests | ${{ needs.accessibility-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Storybook Tests | ${{ needs.storybook-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Tests | ${{ needs.security-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Some tests failed. Please check the individual job results." >> $GITHUB_STEP_SUMMARY
+      
+      - name: Notify on success  
+        if: success()
+        run: |
+          echo "✅ All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
