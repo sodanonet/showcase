@@ -5,7 +5,8 @@
       "Bash(npm search:*)",
       "Bash(git remote get-url:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []
