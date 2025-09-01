@@ -9,12 +9,21 @@ interface ComponentInstance {
   lastUpdated: number;
 }
 
-interface ComponentState {
+interface ComponentStatistics {
+  totalInstances: number;
+  connectedInstances: number;
+  uniqueComponents: number;
+  totalEvents: number;
+  registeredDefinitions: number;
+}
+
+export interface ComponentState {
   instances: ComponentInstance[];
   registry: Record<string, ComponentDefinition>;
   activeComponents: string[];
   componentStyles: Record<string, ComponentStyles>;
   eventLog: ComponentEvent[];
+  statistics: ComponentStatistics;
 }
 
 interface ComponentDefinition {
@@ -104,7 +113,14 @@ const initialState: ComponentState = {
       shadow: '0 10px 25px rgba(0,0,0,0.15)'
     }
   },
-  eventLog: []
+  eventLog: [],
+  statistics: {
+    totalInstances: 0,
+    connectedInstances: 0,
+    uniqueComponents: 0,
+    totalEvents: 0,
+    registeredDefinitions: 4
+  }
 };
 
 const componentSlice = createSlice({
@@ -202,9 +218,9 @@ const componentSlice = createSlice({
       });
     },
     
-    getComponentStats: (state) => {
-      // This is a computed selector that will be used in components
-      return {
+    updateComponentStats: (state) => {
+      // Update computed statistics in state
+      state.statistics = {
         totalInstances: state.instances.length,
         connectedInstances: state.instances.filter(c => c.isConnected).length,
         uniqueComponents: state.activeComponents.length,
@@ -225,7 +241,7 @@ export const {
   logComponentEvent,
   clearEventLog,
   setGlobalComponentTheme,
-  getComponentStats
+  updateComponentStats
 } = componentSlice.actions;
 
 export default componentSlice.reducer;

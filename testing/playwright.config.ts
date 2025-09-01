@@ -138,45 +138,45 @@ export default defineConfig({
   ],
 
   /* Web Server Configuration */
-  webServer: [
+  webServer: process.env.CI ? undefined : [
     {
-      command: 'cd shell-vue && npm run dev',
+      command: 'cd ../shell-vue && npm run dev',
       port: 3000,
       reuseExistingServer: !process.env.CI,
       timeout: 120000
     },
     {
-      command: 'cd react-remote && npm start',
+      command: 'cd ../react-remote && npm start',
       port: 3001,
       reuseExistingServer: !process.env.CI,
       timeout: 120000
     },
     {
-      command: 'cd vue-remote && npm run dev',
+      command: 'cd ../vue-remote && npm run dev',
       port: 3002,
       reuseExistingServer: !process.env.CI,
       timeout: 120000
     },
     {
-      command: 'cd angular-remote && npm start',
+      command: 'cd ../angular-remote && npm start',
       port: 3004,
       reuseExistingServer: !process.env.CI,
       timeout: 120000
     },
     {
-      command: 'cd ts-remote && npm run dev',
+      command: 'cd ../ts-remote && npm run dev',
       port: 3005,
       reuseExistingServer: !process.env.CI,
       timeout: 120000
     },
     {
-      command: 'cd js-remote && npm run dev',
+      command: 'cd ../js-remote && npm run dev',
       port: 3006,
       reuseExistingServer: !process.env.CI,
       timeout: 120000
     },
     {
-      command: 'cd express && npm run dev',
+      command: 'cd ../express && npm run dev',
       port: 5000,
       reuseExistingServer: !process.env.CI,
       timeout: 120000

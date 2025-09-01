@@ -69,11 +69,11 @@ jobs:
       
       - name: Build libraries
         working-directory: nx-monorepo
-        run: npm run build
+        run: npm run components:build
       
       - name: Run tests
         working-directory: nx-monorepo
-        run: npm test -- --passWithNoTests
+        run: npm run components:test
 
   # Express.js API
   express-api:

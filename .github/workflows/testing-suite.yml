@@ -129,7 +129,7 @@ jobs:
           cd ts-remote && npm run build && cd ..
           cd js-remote && npm run build && cd ..
           cd express && npm run build && cd ..
-          cd nx-monorepo && npm run build
+          cd nx-monorepo && npm run components:build && cd ..
       
       - name: Start applications in background
         run: |
