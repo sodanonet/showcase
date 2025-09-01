@@ -1,20 +1,20 @@
-import React from 'react';
+import { ReactNode, CSSProperties, MouseEvent, FC } from 'react';
 
 export interface CardProps {
   title?: string;
   subtitle?: string;
-  children: React.ReactNode;
-  headerAction?: React.ReactNode;
-  footer?: React.ReactNode;
+  children: ReactNode;
+  headerAction?: ReactNode;
+  footer?: ReactNode;
   variant?: 'default' | 'elevated' | 'outlined';
   padding?: 'none' | 'small' | 'medium' | 'large';
   className?: string;
-  style?: React.CSSProperties;
-  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  style?: CSSProperties;
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
   hoverable?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({
+const Card: FC<CardProps> = ({
   title,
   subtitle,
   children,
@@ -123,7 +123,7 @@ const Card: React.FC<CardProps> = ({
         if (hoverable || onClick) {
           Object.assign(e.currentTarget.style, {
             transform: 'translateY(0)',
-            boxShadow: variants[variant].boxShadow || 'none',
+            boxShadow: (variants[variant] as any).boxShadow || 'none',
           });
         }
       }}

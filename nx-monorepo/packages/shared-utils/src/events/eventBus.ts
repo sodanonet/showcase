@@ -1,5 +1,5 @@
 // Event Bus for cross-framework communication in micro-frontend architecture
-export type EventHandler<T = any> = (payload: T) => void;
+export type EventHandler<T = any> = (payload: T) => void | Promise<void>;
 
 export interface EventSubscription {
   unsubscribe: () => void;

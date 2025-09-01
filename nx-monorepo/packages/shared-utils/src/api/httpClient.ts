@@ -159,7 +159,7 @@ class HttpClient {
 
   removeDefaultHeader(key: string): void {
     if (this.defaultConfig.headers) {
-      delete this.defaultConfig.headers[key];
+      delete (this.defaultConfig.headers as Record<string, string>)[key];
     }
   }
 }
