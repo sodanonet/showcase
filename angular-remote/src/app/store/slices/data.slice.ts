@@ -9,7 +9,7 @@ interface DataItem {
   metadata?: Record<string, any>;
 }
 
-interface DataState {
+export interface DataState {
   items: DataItem[];
   filteredItems: DataItem[];
   loading: boolean;

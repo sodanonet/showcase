@@ -9,7 +9,7 @@ interface User {
   avatar?: string;
 }
 
-interface UserState {
+export interface UserState {
   currentUser: User | null;
   isAuthenticated: boolean;
   loading: boolean;

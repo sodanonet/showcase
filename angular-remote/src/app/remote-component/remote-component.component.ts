@@ -34,6 +34,13 @@ export class RemoteComponent implements OnInit, OnDestroy {
   selectedPriority = 'all';
   searchTerm = '';
   currentTime = new Date();
+
+  // Mock data for template
+  tasks: any[] = [
+    { id: '1', name: 'Review Angular Updates', priority: 'high', category: 'Development', completed: false },
+    { id: '2', name: 'Optimize Component Performance', priority: 'medium', category: 'Development', completed: true },
+    { id: '3', name: 'Update Documentation', priority: 'low', category: 'Documentation', completed: false }
+  ];
   
   constructor(private fb: FormBuilder, private reduxService: ReduxService) {
     this.newTaskForm = this.fb.group({
@@ -200,5 +207,88 @@ export class RemoteComponent implements OnInit, OnDestroy {
                         theme.borderRadius === 'small' ? '4px' :
                         theme.borderRadius === 'large' ? '12px' : '8px'
     };
+  }
+
+  // Missing methods referenced in template
+  getTotalUsers(): number {
+    return 1247; // Mock data
+  }
+
+  getTotalRevenue(): number {
+    return 87650; // Mock data
+  }
+
+  getAverageConversion(): number {
+    return 23.8; // Mock data
+  }
+
+  get analyticsData(): any[] {
+    return [
+      { metric: 'Page Views', value: 12450, change: '+15%' },
+      { metric: 'Unique Visitors', value: 8920, change: '+8%' },
+      { metric: 'Conversion Rate', value: 23.8, change: '+12%' },
+      { metric: 'Revenue', value: 87650, change: '+25%' }
+    ];
+  }
+
+  // Simple counter methods for template
+  increment() {
+    this.incrementCounter();
+  }
+
+  decrement() {
+    this.decrementCounter();
+  }
+
+  reset() {
+    this.resetCounter();
+  }
+
+  get counter(): number {
+    // Return mock counter value for template
+    return 0;
+  }
+
+  // Task management methods
+  addTask() {
+    if (this.newTaskForm.valid) {
+      const newTask = {
+        id: Date.now().toString(),
+        name: this.newTaskForm.value.name,
+        priority: this.newTaskForm.value.priority,
+        category: this.newTaskForm.value.category,
+        completed: false
+      };
+      this.tasks.push(newTask);
+      this.newTaskForm.reset({ priority: 'medium', category: 'Development' });
+    }
+  }
+
+  toggleTask(id: string) {
+    const task = this.tasks.find(t => t.id === id);
+    if (task) {
+      task.completed = !task.completed;
+    }
+  }
+
+  deleteTask(id: string) {
+    this.tasks = this.tasks.filter(t => t.id !== id);
+  }
+
+  get filteredTasks(): any[] {
+    return this.tasks.filter(task => {
+      const matchesSearch = task.name.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesPriority = this.selectedPriority === 'all' || task.priority === this.selectedPriority;
+      return matchesSearch && matchesPriority;
+    });
+  }
+
+  trackByTaskId(index: number, task: any): string {
+    return task.id;
+  }
+
+  getCompletionPercentage(): number {
+    const completed = this.tasks.filter(t => t.completed).length;
+    return this.tasks.length ? Math.round((completed / this.tasks.length) * 100) : 0;
   }
 }
