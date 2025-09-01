@@ -86,11 +86,11 @@ export const getUserProfile = async (req: Request, res: Response) => {
       .populate('tasks', 'title status priority createdAt');
     
     if (!user) {
-      throw new ApiError(404, 'User not found');
+      throw new ApiError('User not found', 404);
     }
 
     // Update last login timestamp
-    await User.findByIdUpdate(user._id, { lastLogin: new Date() });
+    await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
     res.json({
       success: true,
@@ -110,7 +110,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to fetch user profile');
+    throw new ApiError('Failed to fetch user profile', 500);
   }
 };
 
@@ -155,7 +155,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
     ).select('-password');
 
     if (!user) {
-      throw new ApiError(404, 'User not found');
+      throw new ApiError('User not found', 404);
     }
 
     res.json({
@@ -172,11 +172,11 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         updatedAt: user.updatedAt
       }
     });
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      throw new ApiError(400, 'Invalid profile data');
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === 'ValidationError') {
+      throw new ApiError('Invalid profile data', 400);
     }
-    throw new ApiError(500, 'Failed to update profile');
+    throw new ApiError('Failed to update profile', 500);
   }
 };
 
@@ -208,22 +208,22 @@ export const changePassword = async (req: Request, res: Response) => {
     const userId = (req as any).user.id;
 
     if (!currentPassword || !newPassword) {
-      throw new ApiError(400, 'Current password and new password are required');
+      throw new ApiError('Current password and new password are required', 400);
     }
 
     if (newPassword.length < 6) {
-      throw new ApiError(400, 'New password must be at least 6 characters long');
+      throw new ApiError('New password must be at least 6 characters long', 400);
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      throw new ApiError(404, 'User not found');
+      throw new ApiError('User not found', 404);
     }
 
     // Verify current password
     const isValidPassword = await bcrypt.compare(currentPassword, user.password);
     if (!isValidPassword) {
-      throw new ApiError(400, 'Current password is incorrect');
+      throw new ApiError('Current password is incorrect', 400);
     }
 
     // Hash new password
@@ -241,7 +241,7 @@ export const changePassword = async (req: Request, res: Response) => {
       message: 'Password changed successfully'
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to change password');
+    throw new ApiError('Failed to change password', 500);
   }
 };
 
@@ -288,7 +288,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
     // Check if user is admin
     if (currentUser.role !== 'admin') {
-      throw new ApiError(403, 'Admin access required');
+      throw new ApiError('Admin access required', 403);
     }
 
     const query: any = {};
@@ -334,7 +334,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to fetch users');
+    throw new ApiError('Failed to fetch users', 500);
   }
 };
 
@@ -377,12 +377,12 @@ export const updateUserStatus = async (req: Request, res: Response) => {
 
     // Check if user is admin
     if (currentUser.role !== 'admin') {
-      throw new ApiError(403, 'Admin access required');
+      throw new ApiError('Admin access required', 403);
     }
 
     // Prevent admin from deactivating themselves
     if (id === currentUser.id) {
-      throw new ApiError(400, 'Cannot change your own status');
+      throw new ApiError('Cannot change your own status', 400);
     }
 
     const user = await User.findByIdAndUpdate(
@@ -392,7 +392,7 @@ export const updateUserStatus = async (req: Request, res: Response) => {
     ).select('-password');
 
     if (!user) {
-      throw new ApiError(404, 'User not found');
+      throw new ApiError('User not found', 404);
     }
 
     res.json({
@@ -401,7 +401,7 @@ export const updateUserStatus = async (req: Request, res: Response) => {
       data: user
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to update user status');
+    throw new ApiError('Failed to update user status', 500);
   }
 };
 
@@ -427,7 +427,7 @@ export const getUserStats = async (req: Request, res: Response) => {
 
     // Check if user is admin
     if (currentUser.role !== 'admin') {
-      throw new ApiError(403, 'Admin access required');
+      throw new ApiError('Admin access required', 403);
     }
 
     const [
@@ -464,6 +464,6 @@ export const getUserStats = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to fetch user statistics');
+    throw new ApiError('Failed to fetch user statistics', 500);
   }
 };

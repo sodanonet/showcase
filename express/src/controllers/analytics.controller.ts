@@ -103,7 +103,7 @@ export const getAnalyticsOverview = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to fetch analytics overview');
+    throw new ApiError('Failed to fetch analytics overview', 500);
   }
 };
 
@@ -253,7 +253,7 @@ export const getTaskAnalytics = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to fetch task analytics');
+    throw new ApiError('Failed to fetch task analytics', 500);
   }
 };
 
@@ -360,7 +360,7 @@ export const getProductivityMetrics = async (req: Request, res: Response) => {
 
     // Format productivity by hour
     const hourlyProductivity = Array.from({ length: 24 }, (_, hour) => {
-      const data = productivityByHour.find(item => item._id === hour);
+      const data = productivityByHour.find((item: any) => item._id === hour);
       return {
         hour,
         count: data ? data.count : 0
@@ -383,7 +383,7 @@ export const getProductivityMetrics = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    throw new ApiError(500, 'Failed to fetch productivity metrics');
+    throw new ApiError('Failed to fetch productivity metrics', 500);
   }
 };
 
@@ -455,7 +455,7 @@ export const exportAnalyticsData = async (req: Request, res: Response) => {
       
       case 'users':
         if (userRole !== 'admin') {
-          throw new ApiError(403, 'Admin access required for user export');
+          throw new ApiError('Admin access required for user export', 403);
         }
         
         data = await User.find()
@@ -478,7 +478,7 @@ export const exportAnalyticsData = async (req: Request, res: Response) => {
         break;
       
       default:
-        throw new ApiError(400, 'Invalid export type');
+        throw new ApiError('Invalid export type', 400);
     }
 
     if (format === 'csv') {
@@ -519,6 +519,6 @@ export const exportAnalyticsData = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    throw new ApiError(500, 'Failed to export data');
+    throw new ApiError('Failed to export data', 500);
   }
 };

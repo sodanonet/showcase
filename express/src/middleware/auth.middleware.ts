@@ -17,3 +17,5 @@ export const protect = async (req: any, res: Response, next: NextFunction) => {
   }
   res.status(401).json({ message: "No token provided" });
 };
+
+export const authenticateToken = protect;

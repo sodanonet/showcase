@@ -4,6 +4,17 @@ interface CustomError extends Error {
   status?: number;
 }
 
+export class ApiError extends Error {
+  status: number;
+  
+  constructor(message: string, statusCode: number = 500) {
+    super(message);
+    this.status = statusCode;
+    this.name = 'ApiError';
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
 export const errorHandler = (
   err: CustomError,
   _req: Request,

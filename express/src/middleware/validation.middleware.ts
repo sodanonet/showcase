@@ -45,3 +45,8 @@ export const validateLogin = (
 
   next();
 };
+
+export const validateRequest = (req: Request, res: Response, next: NextFunction) => {
+  // Generic validation middleware
+  next();
+};

@@ -46,7 +46,7 @@ export const requestSizeLimit = (maxSize: number = 10) => {
     if (contentLength) {
       const sizeMB = parseInt(contentLength) / (1024 * 1024);
       if (sizeMB > maxSize) {
-        throw new ApiError(413, `Request too large. Maximum size allowed: ${maxSize}MB`);
+        throw new ApiError(`Request too large. Maximum size allowed: ${maxSize}MB`, 413);
       }
     }
     
@@ -67,12 +67,12 @@ export const ipFilter = (options: {
     
     // Check blacklist first
     if (blacklist && blacklist.includes(clientIp)) {
-      throw new ApiError(403, message);
+      throw new ApiError(message, 403);
     }
     
     // Check whitelist
     if (whitelist && whitelist.length > 0 && !whitelist.includes(clientIp)) {
-      throw new ApiError(403, message);
+      throw new ApiError(message, 403);
     }
     
     next();
@@ -84,7 +84,7 @@ export const userAgentValidator = (req: Request, res: Response, next: NextFuncti
   const userAgent = req.get('User-Agent');
   
   if (!userAgent) {
-    throw new ApiError(400, 'User-Agent header is required');
+    throw new ApiError('User-Agent header is required', 400);
   }
   
   // Block obvious bots and scrapers
@@ -107,7 +107,7 @@ export const userAgentValidator = (req: Request, res: Response, next: NextFuncti
     
     // Optionally block or add additional verification
     if (req.path.includes('/api/')) {
-      throw new ApiError(403, 'Access denied');
+      throw new ApiError('Access denied', 403);
     }
   }
   
@@ -124,7 +124,7 @@ export const originValidator = (allowedOrigins: string[]) => {
     }
     
     if (!origin) {
-      throw new ApiError(400, 'Origin header is required for this request');
+      throw new ApiError('Origin header is required for this request', 400);
     }
     
     const originUrl = new URL(origin);
@@ -138,7 +138,7 @@ export const originValidator = (allowedOrigins: string[]) => {
     });
     
     if (!isAllowed) {
-      throw new ApiError(403, 'Request from unauthorized origin');
+      throw new ApiError('Request from unauthorized origin', 403);
     }
     
     next();
@@ -168,13 +168,13 @@ export const sqlInjectionProtection = (req: Request, res: Response, next: NextFu
   // Check query parameters
   if (checkValue(req.query)) {
     console.warn(`Potential SQL injection in query: ${JSON.stringify(req.query)} from IP: ${getClientIP(req)}`);
-    throw new ApiError(400, 'Invalid request parameters');
+    throw new ApiError('Invalid request parameters', 400);
   }
   
   // Check request body
   if (req.body && checkValue(req.body)) {
     console.warn(`Potential SQL injection in body: ${JSON.stringify(req.body)} from IP: ${getClientIP(req)}`);
-    throw new ApiError(400, 'Invalid request data');
+    throw new ApiError('Invalid request data', 400);
   }
   
   next();
@@ -234,7 +234,7 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   const sessionCsrfToken = (req as any).session?.csrfToken;
   
   if (!csrfToken || !sessionCsrfToken || csrfToken !== sessionCsrfToken) {
-    throw new ApiError(403, 'Invalid CSRF token');
+    throw new ApiError('Invalid CSRF token', 403);
   }
   
   next();
@@ -288,10 +288,11 @@ export const securityLogger = (req: Request, res: Response, next: NextFunction) 
   };
   
   // Log suspicious activities
+  const userAgent = req.get('User-Agent');
   const suspiciousIndicators = [
     req.url.includes('../'),
-    req.url.includes('admin') && !(req as any).user?.role === 'admin',
-    req.get('User-Agent')?.length > 500,
+    req.url.includes('admin') && (req as any).user?.role !== 'admin',
+    (userAgent?.length || 0) > 500,
     Object.keys(req.query).length > 20,
     JSON.stringify(req.body || '').length > 50000
   ];

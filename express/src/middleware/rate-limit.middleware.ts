@@ -48,13 +48,13 @@ class RateLimiter {
   public middleware = (req: Request, res: Response, next: NextFunction): void => {
     const key = this.config.keyGenerator(req);
     const now = Date.now();
-    const resetTime = now + this.config.windowMs;
+    const windowResetTime = now + this.config.windowMs;
 
     // Initialize or reset if window expired
     if (!this.store[key] || this.store[key].resetTime < now) {
       this.store[key] = {
         count: 0,
-        resetTime
+        resetTime: windowResetTime
       };
     }
 
@@ -77,11 +77,11 @@ class RateLimiter {
 
     // Add rate limit headers
     const remaining = Math.max(0, this.config.maxRequests - this.store[key].count);
-    const resetTime = Math.ceil(this.store[key].resetTime / 1000);
+    const resetTimeHeader = Math.ceil(this.store[key].resetTime / 1000);
 
     res.setHeader('X-RateLimit-Limit', this.config.maxRequests);
     res.setHeader('X-RateLimit-Remaining', remaining);
-    res.setHeader('X-RateLimit-Reset', resetTime);
+    res.setHeader('X-RateLimit-Reset', resetTimeHeader);
 
     // Handle response tracking
     const originalSend = res.send;
