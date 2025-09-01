@@ -15,7 +15,6 @@ interface ChartOptions {
 }
 
 @Component('ts-chart-visualization')
-@ObservedAttributes(['chart-type', 'width', 'height', 'animate'])
 export class ChartVisualization extends BaseWebComponent {
   private chartData: ChartData[] = [
     { label: 'JavaScript', value: 35, color: '#f7df1e' },

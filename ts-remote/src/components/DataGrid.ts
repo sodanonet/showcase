@@ -20,7 +20,6 @@ interface SortConfig {
 }
 
 @Component('ts-data-grid')
-@ObservedAttributes(['page-size', 'sortable', 'filterable'])
 export class DataGrid extends BaseWebComponent {
   private employees: Employee[] = [
     { id: 1, name: 'Alice Johnson', position: 'Senior Developer', department: 'Engineering', salary: 95000, startDate: new Date('2020-01-15'), isActive: true },

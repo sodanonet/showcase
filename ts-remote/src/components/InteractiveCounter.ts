@@ -9,7 +9,6 @@ interface CounterState {
 }
 
 @Component('ts-interactive-counter')
-@ObservedAttributes(['initial-value', 'step', 'min', 'max', 'disabled'])
 export class InteractiveCounter extends BaseWebComponent {
   private state: CounterState = {
     value: 0,

@@ -121,7 +121,7 @@ export class JSShowcaseApp {
     const template = `
       <div class="js-showcase">
         <div class="showcase-header">
-          <h2>🚀 Modern JavaScript Remote</h2>
+          <h2>🚀 Modern JavaScript Remote v2.0</h2>
           <p>Showcasing ES2022+ features in a micro-frontend architecture</p>
           <div class="tech-badges">
             ${this.#features.map(feature => `

@@ -1,6 +1,6 @@
 {
   "name": "js-remote",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Vanilla JavaScript Micro-Frontend with Modern ES2022 Features",
   "main": "src/index.js",
   "scripts": {
@@ -18,7 +18,6 @@
   ],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/plugin-proposal-class-properties": "^7.18.6",

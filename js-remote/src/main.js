@@ -7,7 +7,7 @@ import { ModernAPIDemo } from './components/ModernAPIDemo.js';
 import { StateManager } from './utils/StateManager.js';
 import { EventBus } from './utils/EventBus.js';
 
-console.log('🚀 JavaScript Remote with ES2022+ features loaded!');
+console.log('🚀 JavaScript Remote v2.0 with ES2022+ features loaded!');
 
 // Initialize global utilities
 window.jsRemoteState = new StateManager();

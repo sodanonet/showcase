@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('webpack').container;
+const { ModuleFederationPlugin, DefinePlugin } = require('webpack').container;
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
@@ -32,7 +33,8 @@ module.exports = {
             presets: [
               ['@babel/preset-env', {
                 targets: {
-                  browsers: ['last 2 versions', 'not dead']
+                  browsers: ['> 1%', 'last 2 versions', 'not dead'],
+                  ie: '11'
                 },
                 modules: false
               }]
@@ -48,6 +50,11 @@ module.exports = {
   },
   
   plugins: [
+    new webpack.DefinePlugin({
+      'import.meta': 'undefined',
+      'import.meta.url': '"/"',
+    }),
+    
     new ModuleFederationPlugin({
       name: 'js_remote',
       filename: 'remoteEntry.js',
@@ -67,11 +74,18 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].[contenthash].js',
     clean: true,
-    publicPath: 'auto',
+    publicPath: '/',
   },
   
-  target: 'web',
-  experiments: {
-    outputModule: true,
+  target: ['web', 'es5'],
+  
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
+  
+  optimization: {
+    moduleIds: 'named',
+    chunkIds: 'named',
   },
 };

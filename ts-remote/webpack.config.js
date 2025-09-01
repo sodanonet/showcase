@@ -18,14 +18,28 @@ module.exports = {
   },
   
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    extensionAlias: {
+      '.js': ['.js', '.ts'],
+      '.mjs': ['.mjs', '.mts'],
+    },
   },
   
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        use: 'ts-loader',
+        test: /\.tsx?$/,
+        use: {
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.json',
+            transpileOnly: false,
+            compilerOptions: {
+              module: 'es2020',
+              target: 'es2020',
+            }
+          }
+        },
         exclude: /node_modules/,
       },
       {
@@ -55,6 +69,12 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].[contenthash].js',
     clean: true,
-    publicPath: 'auto',
+    publicPath: '/',
+  },
+  
+  target: ['web', 'es2020'],
+  
+  experiments: {
+    outputModule: false,
   },
 };

@@ -12,7 +12,14 @@
       "Bash(docker build:*)",
       "Bash(docker logs:*)",
       "Bash(git checkout:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(curl:*)",
+      "Bash(docker-compose stop:*)",
+      "Bash(docker-compose rm:*)",
+      "Bash(docker rmi:*)",
+      "Bash(docker-compose up:*)"
     ],
     "deny": [],
     "ask": []

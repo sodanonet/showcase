@@ -2,7 +2,6 @@ import { BaseWebComponent } from '../base/BaseWebComponent';
 import { Component, ObservedAttributes } from '../decorators/Component';
 
 @Component('ts-showcase-app')
-@ObservedAttributes(['theme'])
 export class ShowcaseApp extends BaseWebComponent {
   
   protected getTemplate(): string {

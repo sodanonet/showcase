@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleFederationPlugin } = require('webpack').container;
 const { VueLoaderPlugin } = require('vue-loader');
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
@@ -28,6 +29,19 @@ module.exports = {
     alias: {
       '@': path.resolve(__dirname, 'src'),
       'vue': 'vue/dist/vue.esm-bundler.js'
+    },
+    fallback: {
+      "events": require.resolve("events/"),
+      "util": require.resolve("util/"),
+      "buffer": require.resolve("buffer/"),
+      "process": require.resolve("process/browser"),
+      "stream": require.resolve("stream-browserify"),
+      "path": require.resolve("path-browserify"),
+      "querystring": require.resolve("querystring-es3"),
+      "crypto": require.resolve("crypto-browserify"),
+      "fs": false,
+      "os": require.resolve("os-browserify/browser"),
+      "url": require.resolve("url/")
     }
   },
   
@@ -63,6 +77,18 @@ module.exports = {
   
   plugins: [
     new VueLoaderPlugin(),
+    
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      Buffer: ['buffer', 'Buffer'],
+    }),
+    
+    new webpack.DefinePlugin({
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false,
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    }),
     
     new ModuleFederationPlugin({
       name: 'shell_vue',

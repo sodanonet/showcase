@@ -24,7 +24,6 @@ interface FormState {
 }
 
 @Component('ts-form-validator')
-@ObservedAttributes(['theme', 'strict-mode'])
 export class FormValidator extends BaseWebComponent {
   private state: FormState = {
     fields: new Map(),

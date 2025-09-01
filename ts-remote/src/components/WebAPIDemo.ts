@@ -51,7 +51,6 @@ interface BatteryManager extends EventTarget {
 }
 
 @Component('ts-web-api-demo')
-@ObservedAttributes(['auto-update', 'demo-mode'])
 export class WebAPIDemo extends BaseWebComponent {
   private state: WebAPIState = {
     geolocation: null,
