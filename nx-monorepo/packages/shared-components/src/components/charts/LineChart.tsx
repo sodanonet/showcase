@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
 export interface DataPoint {
   x: number | string;
@@ -206,34 +206,6 @@ const LineChart: React.FC<LineChartProps> = ({
         </text>
       </svg>
       
-      <style jsx>{`
-        @keyframes dash {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        
-        .chart-area {
-          animation: fadeIn 1s ease-in-out;
-        }
-        
-        .chart-dot {
-          animation: fadeIn 1.5s ease-in-out;
-        }
-        
-        .line-chart-container {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-      `}</style>
     </div>
   );
 };

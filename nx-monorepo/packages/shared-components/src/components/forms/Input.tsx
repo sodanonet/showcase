@@ -1,11 +1,11 @@
-import React, { useState, forwardRef } from 'react';
+import { useState, forwardRef, InputHTMLAttributes, ReactNode } from 'react';
 
-export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   error?: string;
   helperText?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
   size?: 'small' | 'medium' | 'large';
   variant?: 'default' | 'filled' | 'outlined';
   required?: boolean;
@@ -185,12 +185,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
         </p>
       )}
       
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: translateY(-50%) rotate(0deg); }
-          100% { transform: translateY(-50%) rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 });

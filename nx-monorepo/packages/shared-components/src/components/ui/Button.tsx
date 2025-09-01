@@ -1,19 +1,51 @@
-import React from 'react';
+import { ReactNode, MouseEvent, useEffect, useRef, FC, CSSProperties } from 'react';
 
 export interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'danger' | 'success';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  icon?: ReactNode;
+  children: ReactNode;
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Spinner = () => {
+  const spinnerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const element = spinnerRef.current;
+    if (!element) return;
+    
+    let angle = 0;
+    const animate = () => {
+      angle += 3;
+      element.style.transform = `rotate(${angle}deg)`;
+      requestAnimationFrame(animate);
+    };
+    
+    const animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, []);
+  
+  return (
+    <div
+      ref={spinnerRef}
+      style={{
+        width: '16px',
+        height: '16px',
+        border: '2px solid transparent',
+        borderTop: '2px solid currentColor',
+        borderRadius: '50%',
+      }}
+    />
+  );
+};
+
+const Button: FC<ButtonProps> = ({
   variant = 'primary',
   size = 'medium',
   disabled = false,
@@ -107,26 +139,9 @@ const Button: React.FC<ButtonProps> = ({
       onClick={handleClick}
       disabled={disabled || loading}
     >
-      {loading && (
-        <div
-          style={{
-            width: '16px',
-            height: '16px',
-            border: '2px solid transparent',
-            borderTop: '2px solid currentColor',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-      )}
+      {loading && <Spinner />}
       {!loading && icon && <span>{icon}</span>}
       <span>{children}</span>
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </button>
   );
 };

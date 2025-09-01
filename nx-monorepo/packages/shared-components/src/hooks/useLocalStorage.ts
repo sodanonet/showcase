@@ -109,6 +109,8 @@ export function useLocalStorage<T>(
         window.removeEventListener('localStorage-change', handleCustomStorageChange as EventListener);
       };
     }
+    
+    return () => {};
   }, [key, initialValue]);
 
   return [storedValue, setValue, removeValue];
@@ -124,7 +126,7 @@ export function useMultipleLocalStorage<T extends Record<string, any>>(
   keys: (keyof T)[],
   initialValues: T
 ): [T, (updates: Partial<T>) => void, () => void] {
-  const [values, setValues] = useState<T>(() => {
+  const [values, setValuesState] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return initialValues;
     }
@@ -147,7 +149,7 @@ export function useMultipleLocalStorage<T extends Record<string, any>>(
 
   const setValues = useCallback(
     (updates: Partial<T>) => {
-      setValues(prev => {
+      setValuesState(prev => {
         const newValues = { ...prev, ...updates };
         
         // Update localStorage for changed keys
@@ -168,7 +170,7 @@ export function useMultipleLocalStorage<T extends Record<string, any>>(
   );
 
   const removeAll = useCallback(() => {
-    setValues(initialValues);
+    setValuesState(initialValues);
     
     if (typeof window !== 'undefined') {
       keys.forEach(key => {
